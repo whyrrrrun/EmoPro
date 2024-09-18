@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> EmoPro: A Prompt Selection Strategy for Emotional Expression in LM-based Speech Synthesis</title>
+  <!-- Include custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Include Google Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/custom.css">
+	<link rel="stylesheet" href="css/normalize.css">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Add custom CSS for improved styling */
+    body {
+      font-family: 'Open Sans', sans-serif; /* Use Open Sans font */
+      margin: 0; /* Remove default margin */
+      padding: 0; /* Remove default padding */
+    }
+    header {
+      background-color: #000; /* Dark background color */
+      color: #fff; /* White text color */
+      padding: 20px; /* Add padding */
+      text-align: center; /* Center-align text */
+    }
+    .container {
+      max-width: 1200px; /* Increase max-width for better content presentation */
+      margin: 0 auto; /* Center-align container */
+      padding: 20px; /* Add padding */
+    }
+    .section {
+      margin-bottom: 40px; /* Add spacing between sections */
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 700; /* Increase font weight for headings */
+      margin-top: 0; /* Remove default margin for headings */
+    }
+    p {
+      line-height: 1.6; /* Increase line height for better readability */
+    }
+    /* Add styles for images */
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    /* Add styles for tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd; /* Add border between table rows */
+    }
+    th {
+      background-color: #f2f2f2; /* Light background color for table header */
+    }
+    /* Add styles for audio controls */
+    audio {
+      width: 100%;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+    <header>
+        <h1>EmoPro: A Prompt Selection Strategy for Emotional Expression in LM-based Speech Synthesis</h1>
+    </header>
+    <div class="code">
+      <p><center>[<a href="">Paper</a>]</center></p>
+    </div>
+    <div class="authors">
+        <p><center>Haoyu Wang, Chunyu Qiang, Tianrui Wang, Cheng Gong, Qiuyu Liu, Yu Jiang, Xiaobao Wang, Chenyang Wang, Chen Zhang</center></p>
+    </div>
+    <div class="affiliations">
+        <center>Tianjin University, Tianjin, China</center>
+        <center>Kuaishou Technology Co., Ltd, Beijing, China</center>
+    </div>
+  
+<p><br /></p>
+  <main>
+    <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">		
+        <h2 class="title is-4">Abstract</h2>
+        <p>Recent advancements in speech synthesis models, trained on extensive datasets, have demonstrated remarkable zero-shot capabilities. These models can control content, timbre, and emotion in generated speech based on prompt inputs. Despite these advancements, the choice of prompts significantly impacts the output quality, yet most existing selection schemes do not adequately address the control of emotional intensity. To address this question, this paper proposes a two-stage prompt selection strategy —— <strong>EmoPro</strong>, which is specifically designed for emotionally controllable speech synthesis. This strategy focuses on selecting highly expressive and high-quality prompts by evaluating them from four perspectives: emotional expression strength, speech quality, text-emotion consistency, and model generation performance. Experimental results show that prompts selected using the proposed method result in more emotionally expressive and engaging synthesized speech compared to those obtained through baseline.</p>
+        <br><br><p>This page shows the samples in the paper "<strong>EmoPro: A Prompt Selection Strategy for Emotional Expression in LM-based Speech Synthesis</strong>".</p>
+    </div>
+
+
+    <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">		
+        <h2 class="title is-4">Overview</h2>
+        <figure class="image">
+          <img src="prompt.png" alt="Overview">
+          <br>
+          <p style="font-style: italic; margin-top: 8px;">
+            <b>Figure 1.</b> 
+            The overview of EmoPro. It consists of two stages: a static selection stage and a dynamic selection stage. The static selection stage evaluates the intrinsic quality of the prompt and its performance in the specific LM-based model, while the dynamic selection stage chooses the most relevant prompt from <strong> k </strong> prompts based on the synthesized text.
+          </p>
+        </figure>
+    </div>
+
+
+
+
+
+
+      <!-- 实验数据和基准数据的额外说明 -->
+      <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">		
+        <h2 class="title is-4">Experiment</h2>
+        <p><strong>Experiment Details:</strong></p>
+        <p>We use a private emotional prompt dataset employed in comprising two men and two women to validate our prompt selection strategy. The dataset includes five distinct emotions: comfort, happy, sad, anger, and surprised. Each speaker exhibits four of these emotions, and 200 data samples for each emotion result in 800 data samples per speaker.</p>
+
+
+        <!-- <p>All test samples and speakers have not appeared in the training set and validation set.</p> -->
+
+      </div>
+
+      <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+        <h2 class="title is-4">Comparison with Baseline Methods</h2>
+        <br>
+        <h3 class="title is-4">CosyVoice</h3>
+      
+        <table align="center">
+        <thead>
+          <tr>
+          <th>Emotion</th>
+          <th>Text</th>
+          <th>Method</th>
+          <th>Prompt Speech</th>
+          <th>Prompt Text</th>
+          <th>Generation</th>
+          </tr>
+        </thead>
+        <tbody>
+         <tr>
+          <td rowspan="12" style="font-size: larger;"><strong>Happy</strong></td>
+          <td rowspan="3">你真是太好了，我会给你介绍我的家人的，他们应该也会很喜欢你。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/210171.wav" /></audio></td>
+          <td>是啊，我之前有看到那个微博上有说什么，三千块请个农民工都请不起，但是可以招一个大学生，笑死。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/210171_210171_2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/210037.wav" /></audio></td>
+          <td>哈哈哈，你真是太好啦，来帮我啊！多谢多谢啦，我会记住你哒。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nvsheng-happy-2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/210074.wav" /></audio></td>
+          <td>谢谢夸奖！其实啊，我之前偷偷练习了好几次呢，这样能确保不会出错哦。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/210074_210074_2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td rowspan="3">好啊，我也很期待认识你的家人，谢谢你啊，愿意让我走进你的生活。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/210171.wav" /></audio></td>
+          <td>是啊，我之前有看到那个微博上有说什么，三千块请个农民工都请不起，但是可以招一个大学生，笑死。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/210171_210171_1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/210149.wav" /></audio></td>
+          <td>这个游戏策略要是可以，嗯也可以考虑一下，感觉我就是那种又菜又爱玩儿的人。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nvsheng-happy-1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/210088.wav" /></audio></td>
+          <td>想象一下就觉得特别好笑，动物们真的很有趣，它们的无忧无虑让我们也能暂时的忘记烦恼。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/210088_210088_1.wav" /></audio></td>
+          </tr>
+          <tr>
+          <td rowspan="3">你真是太好了，我会给你介绍我的家人的，他们应该也会很喜欢你。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8416189.wav" /></audio></td>
+          <td>我很喜欢你今天送我的礼物哦。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8416189_8416189_2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/8416133.wav" /></audio></td>
+          <td>真是太兴奋了，看来敌人也不过如此嘛。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nansheng-happy-2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8416122.wav" /></audio></td>
+          <td>老爸拿到驾照了我替他感到高兴呢。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8416122_8416122_2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td rowspan="3">所以我才打电话给你报喜的嘛，这样儿你就不用担心父母健康的问题了。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8416189.wav" /></audio></td>
+          <td>我很喜欢你今天送我的礼物哦。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8416189_8416189_4.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/8416155.wav" /></audio></td>
+          <td>我做了我应该做的事，帮助别人，快乐自己。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nansheng-happy-4.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8416122.wav" /></audio></td>
+          <td>老爸拿到驾照了我替他感到高兴呢。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8416122_8416122_4.wav" /></audio></td>
+          </tr>
+          
+          <tr>
+          <td rowspan="12" style="font-size: larger;"><strong>Sad</strong></td>
+          <td rowspan="3">没有经历过的人，永远都不会明白，那是一种怎样的切肤之痛。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/230123.wav" /></audio></td>
+          <td>唉，你还没完成市场研究报告吗？所有数据都要精确，尽快给我结果啦。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/230123_230123_1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/230064.wav" /></audio></td>
+          <td>你知道思念一个人的滋味吗？喝多少酒都不能忘记这种感觉。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nvsheng-sad-1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/230101.wav" /></audio></td>
+          <td>难过了也不能告诉别人，因为没有人会在乎，只能自己消化，唉。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/230101_230101_1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td rowspan="3">每当黄昏降临，孤独便如影随形，过去的点滴回忆在脑海中翻涌，无法停息。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/230123.wav" /></audio></td>
+          <td>唉，你还没完成市场研究报告吗？所有数据都要精确，尽快给我结果啦。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/230123_230123_4.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/230144.wav" /></audio></td>
+          <td>唉，当然我理解你的想法，但是你要明白，我们必须先有稳定的经济基础，结婚不是儿戏呀。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nvsheng-sad-4.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/230161.wav" /></audio></td>
+          <td>我很伤心，难道我这么不受大家欢迎吗？为什么要孤立我，我是做错了什么吗？</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/230161_230161_4.wav" /></audio></td>
+          </tr>
+          <tr>
+          <td rowspan="3">对不起啊宝贝，是我最近工作太忙，没好好儿照顾你，以后我会注意的。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8419081.wav" /></audio></td>
+          <td>一切的一切都是变得那么陌生。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8419081_8419081_0.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/8419159.wav" /></audio></td>
+          <td>我还来不及挽留、我们已经相离太远。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nansheng-sad-0.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8419150.wav" /></audio></td>
+          <td>不管怎样，破镜终究还是难以再圆。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8419150_8419150_0.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td rowspan="3">没有经历过的人，永远都不会明白，那是一种怎样的切肤之痛。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8419081.wav" /></audio></td>
+          <td>一切的一切都是变得那么陌生。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8419081_8419081_1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/8419098.wav" /></audio></td>
+          <td>最后终于在眼泪中明白，有些人一旦错过就不在。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nansheng-sad-1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8419150.wav" /></audio></td>
+          <td>不管怎样，破镜终究还是难以再圆。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8419150_8419150_1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td rowspan="12" style="font-size: larger;"><strong>Anger</strong></td>
+          <td rowspan="3">烦死了，别一天给我打电话，都要被你气死了！</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/220145.wav" /></audio></td>
+          <td>你这样说真的让我很失望。难道我们的感情，不值得一个婚姻的承诺吗？难道你不愿意跟我共度余生吗，啊？</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/220145_220145_2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/220234.wav" /></audio></td>
+          <td>你每次都是，这个那个的，天呐，你能不能承担一些。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nvsheng-anger-2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/220117.wav" /></audio></td>
+          <td>沟通沟通，你就不能理解一下我也要休息吗？哼，天天谈心，我也会觉得累啊！</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/220117_220117_2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td rowspan="3">不行，这次绝不能这么算了！你是我女朋友，我不能让任何人伤害你，哪怕是你父母也不行。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/220145.wav" /></audio></td>
+          <td>你这样说真的让我很失望。难道我们的感情，不值得一个婚姻的承诺吗？难道你不愿意跟我共度余生吗，啊？</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/220145_220145_1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/220115.wav" /></audio></td>
+          <td>我觉得我们的感情不需要通过礼物来表达。呵，你也不能老是这么物质吧。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nvsheng-anger-1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/220140.wav" /></audio></td>
+          <td>哼，这个回答让我非常失望，客户满意度调查应该是持续进行的，你们竟然没有完整的数据，我要你们在一周之内给我详细的客户反馈报告和改进计划。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/220140_220140_1.wav" /></audio></td>
+          </tr>
+          <tr>
+          <td rowspan="3">什么？他们竟然这样对你？这太过分了吧！我忍受不了别人这么对你，特别是你的父母。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8417089.wav" /></audio></td>
+          <td>我非要干掉这个不长眼的东西！</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8417089_8417089_0.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/8417036.wav" /></audio></td>
+          <td>我跟你讲，你别欺人太甚！</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nansheng-anger-0.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8417192.wav" /></audio></td>
+          <td>你要害死我们所有人啊，太令人怒火中烧了！</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8417192_8417192_0.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td rowspan="3">烦死了，别一天给我打电话，都要被你气死了！</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8417089.wav" /></audio></td>
+          <td>我非要干掉这个不长眼的东西！</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8417089_8417089_2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/8417024.wav" /></audio></td>
+          <td>我已经跟你说过很多次了我一点儿都不喜欢你！</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nansheng-anger-2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8417192.wav" /></audio></td>
+          <td>你要害死我们所有人啊，太令人怒火中烧了！</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8417192_8417192_2.wav" /></audio></td>
+          </tr>
+      
+      
+          <tr>
+          <td rowspan="6" style="font-size: larger;"><strong>Surprised</strong></td>
+          <td style="width: 300px;" rowspan="3">啊？还有惊喜？真的假的？你这一天到底准备了多少惊喜给我呀？</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/240166.wav" /></audio></td>
+          <td style="width: 300px;">你这话说的？就算科班出身老师也不会闲的没事教俄语吧！是吧。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/240166_240166_2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/240088.wav" /></audio></td>
+          <td>真的假的？你最近都在忙复习，还记得今天是什么日子吗？你居然忘了我给你准备的惊喜？</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nvsheng-surprised-2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/240026.wav" /></audio></td>
+          <td>他打得确实很不错，但年龄真的不到二十岁么？怎么可能呢？这么年轻就有这么强的实力了吗？</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/240026_240026_2.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td rowspan="3">真的？那我可得好好品尝一下。哇，你还准备了这么多食材？平时看你懒懒的，原来还有这一手。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/240166.wav" /></audio></td>
+          <td>你这话说的？就算科班出身老师也不会闲的没事教俄语吧！是吧。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/240166_240166_4.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/240177.wav" /></audio></td>
+          <td>诶，食堂有休息区吗？我还不知道呢，听起来不错，那我们赶紧去吧，我真的撑不住了。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nvsheng-surprised-4.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/240155.wav" /></audio></td>
+          <td>啊？他们在约会？天哪，这也太意外了吧！我真是没想到他们会在一起，看来他们一直很低调啊。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/240155_240155_4.wav" /></audio></td>
+          </tr>
+          <tr>
+      
+      
+          <tr>
+          <td rowspan="6" style="font-size: larger;"><strong>Comfort</strong></td>
+          <td rowspan="3">阳光总在风雨后，没经历挫折的风雨，怎能看到成功的彩虹？</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8415148.wav" /></audio></td>
+          <td>穷人缺的是钱而不是时间，富人缺的是时间而不是钱。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8415148_8415148_1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/8415065.wav" /></audio></td>
+          <td>努力就是光，成功就是影。没有光哪儿来的影？</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nansheng-comfort-1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8415026.wav" /></audio></td>
+          <td>天中黎明前是最黑暗的，但也是最接近光明的时候，暴风雨前是宁静的，但彩虹总是在风雨后。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8415026_8415026_1.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td rowspan="3">生活有时可能会让人失望，但请相信，未来会有更美好的事情在等着你。</td>
+          <td>Random</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8415148.wav" /></audio></td>
+          <td>穷人缺的是钱而不是时间，富人缺的是时间而不是钱。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/Random/8415148_8415148_4.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td>MiniLM</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/8415164.wav" /></audio></td>
+          <td>生活要会取舍，不为打翻的牛奶哭泣，因为你再哭泣牛奶还是喝不了，所以要放弃它去重新获取。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/MiniLM/nansheng-comfort-4.wav" /></audio></td>
+          </tr>
+      
+          <tr>
+          <td><strong>EmoPro</strong></td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8415103.wav" /></audio></td>
+          <td>不用着急，慢慢地说，大家相信你一定会说得很好。</td>
+          <td><audio controls="" preload="auto"><source src="wav/cosyvoice/EmoPro/8415103_8415103_4.wav" /></audio></td>
+          </tr>
+          
+      
+
+          
+        </tbody>
+        </table>
+        <br>
+        <br>
+      
+        <br>
+        <h3 class="title is-4">GPT-SoVITS</h3>
+      
+        <table align="center">
+          <thead>
+            <tr>
+            <th>Emotion</th>
+            <th>Text</th>
+            <th>Method</th>
+            <th>Prompt Speech</th>
+            <th>Prompt Text</th>
+            <th>Generation</th>
+            </tr>
+          </thead>
+          <tbody>
+           <tr>
+            <td rowspan="12" style="font-size: larger;"><strong>Happy</strong></td>
+            <td rowspan="3">这每一颗烟花都像是我们的梦想，绽放在这个夜晚，让我觉得一切都那么的美好。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/210140.wav" /></audio></td>
+            <td>呵是咱们拍的那个电视剧真的太狗血啦，而且人又不好看。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/210140_210140_3.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/210195.wav" /></audio></td>
+            <td>呵呵呵，是啊，我觉得海边特别适合我们，然后婚礼上一定要有很多鲜花，铺满满个会场的那种，感觉像是走进了花海里，哈哈。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/210195_210195.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/210091.wav" /></audio></td>
+            <td style="width: 300px;">嗯，我觉得我们挺好的呀，我们都有自己的梦想，也能理解和支持对方的梦想。这点让我觉得特别幸福，真的。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/210091_210091_3.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td rowspan="3">你真是太好了，我会给你介绍我的家人的，他们应该也会很喜欢你。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/210140.wav" /></audio></td>
+            <td>呵是咱们拍的那个电视剧真的太狗血啦，而且人又不好看。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/210140_210140_2.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/210037.wav" /></audio></td>
+            <td>哈哈哈，你真是太好啦，来帮我啊！多谢多谢啦，我会记住你哒。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/210037_210037.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/210221.wav" /></audio></td>
+            <td>哇，哈哈，听起来好幸福啊，你爸妈真是模范夫妻呢。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/210221_210221_2.wav" /></audio></td>
+            </tr>
+            <tr>
+            <td style="width: 300px;" rowspan="3">这每一颗烟花都像是我们的梦想，绽放在这个夜晚，让我觉得一切都那么的美好。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8416141.wav" /></audio></td>
+            <td>摇着脑袋，美美仰天哈哈大笑不止。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8416141_8416141_3.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8416092.wav" /></audio></td>
+            <td>看看那美丽的公主图案，粉色的花边，精巧的拉杆，我心花怒放啊。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8416092_8416092.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8416098.wav" /></audio></td>
+            <td>我听徐老师说到海洋馆可高兴了。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8416098_8416098_3.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td rowspan="3">你真是太好了，我会给你介绍我的家人的，他们应该也会很喜欢你。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8416141.wav" /></audio></td>
+            <td>摇着脑袋，美美仰天哈哈大笑不止。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8416141_8416141_2.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8416133.wav" /></audio></td>
+            <td>真是太兴奋了，看来敌人也不过如此嘛。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8416133_8416133.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8416020.wav" /></audio></td>
+            <td>我看了，笑的我肚子痛了。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8416020_8416020_2.wav" /></audio></td>
+            </tr>
+            
+            <tr>
+            <td rowspan="12" style="font-size: larger;"><strong>Sad</strong></td>
+            <td rowspan="3">没有经历过的人，永远都不会明白，那是一种怎样的切肤之痛。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/230037.wav" /></audio></td>
+            <td>唉，不过现在呢因为时间比较紧嘛，所以之前没有报考，打算等到大二再考。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/230037_230037_1.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/230064.wav" /></audio></td>
+            <td>你知道思念一个人的滋味吗？喝多少酒都不能忘记这种感觉。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/230064_230064.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/230101.wav" /></audio></td>
+            <td>难过了也不能告诉别人，因为没有人会在乎，只能自己消化，唉。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/230101_230101_1.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td rowspan="3">我常常感到无比孤独，仿佛所有的欢声笑语都与我无关，只留下心底的空虚与失落。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/230037.wav" /></audio></td>
+            <td>唉，不过现在呢因为时间比较紧嘛，所以之前没有报考，打算等到大二再考。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/230037_230037_3.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/230207.wav" /></audio></td>
+            <td>切，怎么会呢？你知道我有多在乎你吗？听到你说我不关心你，好像我做什么都错了似的，唉。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/230207_230207.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/230195.wav" /></audio></td>
+            <td>对不起啊我真的很抱歉，希望你能理解，我真的没想过会走到这一步，我现在也很迷茫，我不知道接下来该怎么办。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/230195_230195_3.wav" /></audio></td>
+            </tr>
+            <tr>
+            <td rowspan="3">没有经历过的人，永远都不会明白，那是一种怎样的切肤之痛。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8419143.wav" /></audio></td>
+            <td>我拖着沉重的步伐走着走着。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8419143_8419143_1.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8419098.wav" /></audio></td>
+            <td>最后终于在眼泪中明白，有些人一旦错过就不在。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8419098_8419098.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8419037.wav" /></audio></td>
+            <td>短短的一句话，含着我数不尽的悲痛与心伤。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8419037_8419037_1.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td rowspan="3">每当黄昏降临，孤独便如影随形，过去的点滴回忆在脑海中翻涌，无法停息。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8419143.wav" /></audio></td>
+            <td>我拖着沉重的步伐走着走着。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8419143_8419143_4.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8419179.wav" /></audio></td>
+            <td>当初海誓山盟甜言蜜语变成伤我最深的话语。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8419179_8419179.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8419109.wav" /></audio></td>
+            <td>每当我经过那里时，泪水又不禁地流了下来。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8419109_8419109_4.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td rowspan="12" style="font-size: larger;"><strong>Anger</strong></td>
+            <td rowspan="3">不行，这次绝不能这么算了！你是我女朋友，我不能让任何人伤害你，哪怕是你父母也不行。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/220202.wav" /></audio></td>
+            <td>呵呵，对呀，你说现在各奔东西，分了就分了呗，现在也没办法。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/220202_220202_1.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/220115.wav" /></audio></td>
+            <td>我觉得我们的感情不需要通过礼物来表达。呵，你也不能老是这么物质吧。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/220115_220115.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/220140.wav" /></audio></td>
+            <td>哼，这个回答让我非常失望，客户满意度调查应该是持续进行的，你们竟然没有完整的数据，我要你们在一周之内给我详细的客户反馈报告和改进计划。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/220140_220140_1.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td rowspan="3">每次遇到问题，你总是找借口推卸责任，这让我感到无比愤怒。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/220202.wav" /></audio></td>
+            <td>呵呵，对呀，你说现在各奔东西，分了就分了呗，现在也没办法。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/220202_220202_3.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/220250.wav" /></audio></td>
+            <td>哼，你总是这样，每次都用工作当借口，你就不能重视我们的关系吗？</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/220250_220250.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/220151.wav" /></audio></td>
+            <td>嗯，我真的很生气，每次你都有理由，可是你知道我听到这些谎言的时候我有多难受吗？</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/220151_220151_3.wav" /></audio></td>
+            </tr>
+            <tr>
+            <td rowspan="3">什么？他们竟然这样对你？这太过分了吧！我忍受不了别人这么对你，特别是你的父母。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8417122.wav" /></audio></td>
+            <td>我管你干什么，我可不怕你。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8417122_8417122_0.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8417036.wav" /></audio></td>
+            <td>我跟你讲，你别欺人太甚！</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8417036_8417036.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8417162.wav" /></audio></td>
+            <td>卖国贼罪不容赦，千刀万剐，也不能解百姓心头之恨呐。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8417162_8417162_0.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td rowspan="3">每次遇到问题，你总是找借口推卸责任，这让我感到无比愤怒。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8417122.wav" /></audio></td>
+            <td>我管你干什么，我可不怕你。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8417122_8417122_3.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8417134.wav" /></audio></td>
+            <td>回忆起某个令人气愤的事情我就想破口大骂。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8417134_8417134.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8417173.wav" /></audio></td>
+            <td>这些叛徒目无纪法草菅人命，真是令人痛恨！</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8417173_8417173_3.wav" /></audio></td>
+            </tr>
+        
+        
+            <tr>
+            <td rowspan="6" style="font-size: larger;"><strong>Surprised</strong></td>
+            <td rowspan="3">我的天哪，这还是高中众人口中那个严厉而慈爱的教导主任吗？</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/240005.wav" /></audio></td>
+            <td>糟糕，我的微博被我男朋友发现了！我还发了好多吐槽他的话呢，完蛋了他肯定很生气。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/240005_240005_3.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/240190.wav" /></audio></td>
+            <td>哇，还有什么是你不会的！你简直就是个全能天才，无论什么事情都能轻松搞定。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/240190_240190.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/240128.wav" /></audio></td>
+            <td>什么？她明天就要结婚了？这也太突然了吧！为什么之前一点风声都没有啊？</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/240128_240128_3.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td rowspan="3">真的？那我可得好好品尝一下。哇，你还准备了这么多食材？平时看你懒懒的，原来还有这一手。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/240005.wav" /></audio></td>
+            <td>糟糕，我的微博被我男朋友发现了！我还发了好多吐槽他的话呢，完蛋了他肯定很生气。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/240005_240005_4.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/240177.wav" /></audio></td>
+            <td>诶，食堂有休息区吗？我还不知道呢，听起来不错，那我们赶紧去吧，我真的撑不住了。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/240177_240177.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/240153.wav" /></audio></td>
+            <td>哇真的？你真是太用心了！这些是我一直想看，没想到你竟然记得我的兴趣爱好，还特意为我找来了。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/240153_240153_4.wav" /></audio></td>
+            </tr>
+      
+        
+        
+            <tr>
+            <td rowspan="6" style="font-size: larger;"><strong>Comfort</strong></td>
+            <td rowspan="3">阳光总在风雨后，没经历挫折的风雨，怎能看到成功的彩虹？</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8415148.wav" /></audio></td>
+            <td>穷人缺的是钱而不是时间，富人缺的是时间而不是钱。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8415148_8415148_1.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8415065.wav" /></audio></td>
+            <td></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8415065_8415065.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8415086.wav" /></audio></td>
+            <td>一次的错误，算不得什么，别让小小的一次错赶走了快乐，愿你赶快走出失意，脸上露出笑容吧！</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8415086_8415086_1.wav" /></audio></td>
+            </tr>
+            <tr>
+            <td rowspan="3">生活有时可能会让人失望，但请相信，未来会有更美好的事情在等着你。</td>
+            <td>Random</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8415148.wav" /></audio></td>
+            <td>穷人缺的是钱而不是时间，富人缺的是时间而不是钱。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/Random/8415148_8415148_4.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td>MiniLM</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8415164.wav" /></audio></td>
+            <td>生活要会取舍，不为打翻的牛奶哭泣，因为你再哭泣牛奶还是喝不了，所以要放弃它去重新获取。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/MiniLM/8415164_8415164.wav" /></audio></td>
+            </tr>
+        
+            <tr>
+            <td><strong>EmoPro</strong></td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8415157.wav" /></audio></td>
+            <td>有些事放开就好，看开就好，不必计较太多。心宽，就是对自己最好的礼物。</td>
+            <td><audio controls="" preload="auto"><source src="wav/GPTSoVITS/EmoPro/8415157_8415157_4.wav" /></audio></td>
+            </tr>
+        
+        
+        
+            
+        
+        
+            
+          </tbody>
+          </table>
+        
+        </div>
+
+
+      <!-- <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+
+        <h2 class="title is-4">Different LM-based TTS with The Same Prompt Candidates.</h2>
+
+        <p></p>
+
+      </div> -->
+
+      <!-- <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+        <h2 class="title is-4">Different Parameter Settings</h2>
+
+        <p></p>
+
+
+      </div> -->
+
+
+
+      <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+
+        <h2 class="title is-4">Quality Selecting</h2>
+
+        <p></p>
+
+        <table align="center">
+        <thead>
+          <tr>
+            <th>Emotion</th>
+            <th>Method</th>
+            <th>Prompt</th>
+            <th>Text</th>
+            <th>Generation</th>
+          </tr>
+        </thead>
+        <tbody>
+         <tr>          
+          
+          
+            <td rowspan="12" style="font-size: larger;"><strong>Happy</strong></td>
+            <td rowspan="6"><strong>EmoPro</strong></td>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy/8416098.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy/8416098_8416098_0.wav" /></audio></td>
+          </tr>
+        
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy/8416098_8416098_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy/8416098_8416098_19.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy/210074.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy/210074_210074_0.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy/210074_210074_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td style="width: 200px;">在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy/210074_210074_19.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td rowspan="6">&#x229D;PSQ</td>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy_psq/8416037.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy_psq/8416037_8416037_0.wav" /></audio></td>
+          </tr>
+        
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy_psq/8416037_8416037_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy_psq/8416037_8416037_19.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy_psq/210035.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy_psq/210035_210035_0.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy_psq/210035_210035_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy_psq/210035_210035_19.wav" /></audio></td>
+          </tr>
+                
+            <td rowspan="12" style="font-size: larger;"><strong>Sad</strong></td>
+            <td rowspan="6"><strong>EmoPro</strong></td>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad/8419150.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad/8419150_8419150_0.wav" /></audio></td>
+          </tr>
+        
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad/8419150_8419150_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad/8419150_8419150_19.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad/230101.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad/230101_230101_0.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad/230101_230101_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad/230101_230101_19.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td rowspan="6">&#x229D;PSQ</td>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad_psq/8419027.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad_psq/8419027_8419027_0.wav" /></audio></td>
+          </tr>
+        
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad_psq/8419027_8419027_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad_psq/8419027_8419027_19.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad_psq/230052.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad_psq/230052_230052_0.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad_psq/230052_230052_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad_psq/230052_230052_19.wav" /></audio></td>
+          </tr>
+                
+
+          <tr>
+            <td rowspan="12" style="font-size: larger;"><strong>Anger</strong></td>
+            <td rowspan="6"><strong>EmoPro</strong></td>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger/8417001.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger/8417001_8417001_0.wav" /></audio></td>
+          </tr>
+        
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger/8417001_8417001_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger/8417001_8417001_19.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger/220096.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger/220096_220096_0.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger/220096_220096_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger/220096_220096_19.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td rowspan="6">&#x229D;PSQ</td>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger_psq/8417015.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger_psq/8417015_8417015_0.wav" /></audio></td>
+          </tr>
+        
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger_psq/8417015_8417015_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger_psq/8417015_8417015_19.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger_psq/220272.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger_psq/220272_220272_0.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger_psq/220272_220272_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger_psq/220272_220272_19.wav" /></audio></td>
+          </tr>
+                
+
+          <tr>
+            <td rowspan="6" style="font-size: larger;"><strong>Surprised</strong></td>
+            <td rowspan="3"><strong>EmoPro</strong></td>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised/240072.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised/240072_240072_0.wav" /></audio></td>
+          </tr>
+        
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised/240072_240072_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised/240072_240072_19.wav" /></audio></td>
+          </tr>
+                
+                
+          <tr>
+            <td rowspan="3">&#x229D;PSQ</td>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised_psq/240093.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised_psq/240093_240093_0.wav" /></audio></td>
+          </tr>
+        
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised_psq/240093_240093_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised_psq/240093_240093_19.wav" /></audio></td>
+          </tr>
+
+
+          <tr>
+            <td rowspan="6" style="font-size: larger;"><strong>Comfort</strong></td>
+            <td rowspan="3"><strong>EmoPro</strong></td>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort/8415026.wav" /></audio></td>
+            <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort/8415026_8415026_0.wav" /></audio></td>
+          </tr>
+        
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort/8415026_8415026_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort/8415026_8415026_19.wav" /></audio></td>
+          </tr>
+                
+                
+          <tr>
+            <td rowspan="3">&#x229D;PSQ</td>
+            <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort_psq/8415162.wav" /></audio></td>
+            <td style="width: 450px;">天空飘着白云，微风轻拂，带来凉爽气息。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort_psq/8415162_8415162_0.wav" /></audio></td>
+          </tr>
+        
+          <tr>
+            <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort_psq/8415162_8415162_13.wav" /></audio></td>
+          </tr>
+                
+          <tr>
+            <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+            <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort_psq/8415162_8415162_19.wav" /></audio></td>
+          </tr>
+          
+
+        </tbody>
+        </table>
+      </div>
+
+
+
+
+      <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">
+        <h2 class="title is-4">Model Performance Selecting</h2>
+
+        <p></p>
+
+        <table align="center">
+          <thead>
+            <tr>
+              <th>Emotion</th>
+              <th>Method</th>
+              <th>Prompt</th>
+              <th>Text</th>
+              <th>Generation</th>
+            </tr>
+          </thead>
+          <tbody>
+           <tr>          
+            
+            
+              <td rowspan="12" style="font-size: larger;"><strong>Happy</strong></td>
+              <td rowspan="6"><strong>EmoPro</strong></td>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy/8416098.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy/8416098_8416098_0.wav" /></audio></td>
+            </tr>
+          
+            <tr>
+              <td style="width: 200px;">她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy/8416098_8416098_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy/8416098_8416098_19.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy/210074.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy/210074_210074_0.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy/210074_210074_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy/210074_210074_19.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td rowspan="6">&#x229D;PMP</td>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy_pmp/8416020.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy_pmp/8416020_8416020_0.wav" /></audio></td>
+            </tr>
+          
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy_pmp/8416020_8416020_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_happy_pmp/8416020_8416020_19.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy_pmp/210091.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy_pmp/210091_210091_0.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy_pmp/210091_210091_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_happy_pmp/210091_210091_19.wav" /></audio></td>
+            </tr>
+                  
+              <td rowspan="12" style="font-size: larger;"><strong>Sad</strong></td>
+              <td rowspan="6"><strong>EmoPro</strong></td>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad/8419150.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad/8419150_8419150_0.wav" /></audio></td>
+            </tr>
+          
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad/8419150_8419150_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad/8419150_8419150_19.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad/230101.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad/230101_230101_0.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad/230101_230101_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad/230101_230101_19.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td rowspan="6">&#x229D;PMP</td>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad_pmp/8419037.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad_pmp/8419037_8419037_0.wav" /></audio></td>
+            </tr>
+          
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad_pmp/8419037_8419037_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_sad_pmp/8419037_8419037_19.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad_pmp/230195.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad_pmp/230195_230195_0.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad_pmp/230195_230195_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_sad_pmp/230195_230195_19.wav" /></audio></td>
+            </tr>
+                  
+  
+            <tr>
+              <td rowspan="12" style="font-size: larger;"><strong>Anger</strong></td>
+              <td rowspan="6"><strong>EmoPro</strong></td>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger/8417001.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger/8417001_8417001_0.wav" /></audio></td>
+            </tr>
+          
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger/8417001_8417001_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger/8417001_8417001_19.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger/220096.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger/220096_220096_0.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger/220096_220096_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger/220096_220096_19.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td rowspan="6">&#x229D;PMP</td>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger_pmp/8417007.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger_pmp/8417007_8417007_0.wav" /></audio></td>
+            </tr>
+          
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger_pmp/8417007_8417007_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_anger_pmp/8417007_8417007_19.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger_pmp/220117.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger_pmp/220117_220117_0.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger_pmp/220117_220117_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_anger_pmp/220117_220117_19.wav" /></audio></td>
+            </tr>
+                  
+  
+            <tr>
+              <td rowspan="6" style="font-size: larger;"><strong>Surprised</strong></td>
+              <td rowspan="3"><strong>EmoPro</strong></td>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised/240072.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised/240072_240072_0.wav" /></audio></td>
+            </tr>
+          
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised/240072_240072_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised/240072_240072_19.wav" /></audio></td>
+            </tr>
+                  
+                  
+            <tr>
+              <td rowspan="3">&#x229D;PMP</td>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised_pmp/240128.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised_pmp/240128_240128_0.wav" /></audio></td>
+            </tr>
+          
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised_pmp/240128_240128_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/female_surprised_pmp/240128_240128_19.wav" /></audio></td>
+            </tr>
+  
+  
+            <tr>
+              <td rowspan="6" style="font-size: larger;"><strong>Comfort</strong></td>
+              <td rowspan="3"><strong>EmoPro</strong></td>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort/8415026.wav" /></audio></td>
+              <td style="width: 450px;">天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort/8415026_8415026_0.wav" /></audio></td>
+            </tr>
+          
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort/8415026_8415026_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort/8415026_8415026_19.wav" /></audio></td>
+            </tr>
+                  
+                  
+            <tr>
+              <td rowspan="3">&#x229D;PMP</td>
+              <td rowspan="3"><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort_pmp/8415103.wav" /></audio></td>
+              <td>天空飘着白云，微风轻拂，带来凉爽气息。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort_pmp/8415103_8415103_0.wav" /></audio></td>
+            </tr>
+          
+            <tr>
+              <td>她打开收音机，听着熟悉的音乐，享受难得的悠闲时光，暂时抛开生活烦恼，沉浸在旋律中，仿佛整个世界都变得轻松。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort_pmp/8415103_8415103_13.wav" /></audio></td>
+            </tr>
+                  
+            <tr>
+              <td>在机场候机大厅，人们安静地等待登机通知，气氛中充满期待与平和，每个人都在为即将到来的旅程做着准备。</td>
+              <td><audio controls="" preload="auto"><source src="wav/pmp_psq/male_comfort_pmp/8415103_8415103_19.wav" /></audio></td>
+            </tr>
+            
+  
+          </tbody>
+          </table>
+      </div>
+
+
+      <div class="container pt-5 mt-5 shadow p-5 mb-5 bg-white rounded">		
+        <h2 class="title is-4">Pitch</h2>
+        <figure class="image">
+          <img src="pitch.png" alt="pitch" style="max-width: 60%; height: auto;">
+          <p style="font-style: italic; margin-top: 8px;">
+            <b>Figure 2.</b> 
+            Mean and variance of emotional speech pitch: red indicates anger, blue indicates comfort, orange indicates sad, green indicates happy, and purple indicates surprised.
+          </p>
+          <figcaption style="font-style: italic; margin-top: 8px;">
+          </figcaption>
+        </figure>
+        <p></p>
+    </div>
+
+
+
+  </main>
+  <footer>
+    <p>© 2024 <strong>EmoPro</strong>. All rights reserved.</p>
+  </footer>
+</body>
+</html>
+
+
+
+
